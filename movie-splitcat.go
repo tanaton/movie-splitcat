@@ -51,22 +51,31 @@ func main() {
 	if len(os.Args) >= 3 {
 		base = os.Args[2]
 	}
+	tmp := "."
+	if len(os.Args) >= 4 {
+		tmp = os.Args[3]
+	}
 
 	mm, err := readSplitFile(sp)
 	if err != nil {
 		log.Warnw("splitファイルの読み取りに失敗", "error", err)
 		os.Exit(1)
 	}
-	ml, err := splitMovies(base, mm)
+	log.Infow("splitファイルの読み取りに成功")
+
+	ml, err := splitMovies(base, tmp, mm)
 	if err != nil {
 		log.Warnw("動画の切り出しに失敗", "error", err)
 		os.Exit(1)
 	}
+	log.Infow("動画の切り出しに成功")
+
 	cp, err := createConcatFile(base, ml)
 	if err != nil {
 		log.Warnw("concatファイルの生成に失敗", "error", err)
 		os.Exit(1)
 	}
+	log.Infow("concatファイルの生成に成功")
 	defer os.Remove(cp)
 	err = ffmpegCombine(cp)
 	if err != nil {
@@ -111,7 +120,7 @@ func readSplitFile(sp string) (map[string]Movie, error) {
 	return mm, nil
 }
 
-func splitMovies(base string, mm map[string]Movie) ([]string, error) {
+func splitMovies(base, tmp string, mm map[string]Movie) ([]string, error) {
 	pl, err := filepath.Glob(filepath.Join(base, "*.mp4"))
 	if err != nil {
 		return nil, errors.Wrap(err, "フォルダの読み取りに失敗")
@@ -123,11 +132,12 @@ func splitMovies(base string, mm map[string]Movie) ([]string, error) {
 		i := strings.Index(file, "_")
 		vid := file[0:i]
 		if m, ok := mm[vid]; ok {
-			mp := filepath.Join(base, m.vid+"_movie-splitcat.mp4")
+			mp := filepath.Join(tmp, m.vid+"_movie-splitcat.mp4")
 			err := m.ffmpegSplit(p, mp)
 			if err != nil {
 				return nil, errors.Wrap(err, "動画の切り出しに失敗")
 			}
+			log.Infow("動画の切り出しに成功", "vid", m.vid, "src", p, "dst", mp)
 			ml = append(ml, mp)
 		}
 	}
@@ -193,6 +203,7 @@ func ffmpegCombine(cp string) error {
 		"-c:v", "libx264",
 		"-preset", "slow",
 		"-crf", "18",
+		"-vf", "scale=1280:-1",
 		"-c:a", "aac",
 		"-b:a", "192k",
 		"-pix_fmt", "yuv420p",
@@ -203,7 +214,7 @@ func ffmpegCombine(cp string) error {
 	cmd.Stderr = &sbuf
 	err := cmd.Run()
 	if err != nil {
-		return err
+		return errors.Wrap(err, sbuf.String())
 	}
 	return nil
 }
