@@ -200,6 +200,7 @@ func ffmpegCombine(cp string) error {
 	args := []string{
 		"-f", "concat",
 		"-i", cp,
+		"-threads", "0",
 		"-c:v", "libx264",
 		"-preset", "slow",
 		"-crf", "18",
