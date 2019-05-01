@@ -175,6 +175,7 @@ func (m Movie) ffmpegSplit(src, dst string) error {
 
 	// ffmpeg -ss 4500 -i input.mp4 -t 60 -vcodec copy -acodec copy 1a.mp4
 	args := []string{
+		"-y",
 		"-ss", strconv.FormatInt(int64(m.start.Seconds()), 10),
 		"-i", src,
 		"-t", strconv.FormatInt(int64(m.end.Seconds()-m.start.Seconds()), 10),
@@ -198,6 +199,7 @@ func ffmpegCombine(cp string) error {
 
 	// ffmpeg -i input.mov -c:v libx264 -preset slow -crf 18 -c:a aac -b:a 192k -pix_fmt yuv420p output.mkv
 	args := []string{
+		"-y",
 		"-f", "concat",
 		"-i", cp,
 		"-threads", "0",
