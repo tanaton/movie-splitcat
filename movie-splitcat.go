@@ -207,7 +207,7 @@ func ffmpegCombine(cp string) error {
 		"-f", "concat",
 		"-safe", "0",
 		"-i", cp,
-		"-threads", "0",
+		"-threads", "12",
 		"-fpre", "./libx264-hq-ts.ffpreset",
 		"-c:v", "libx264",
 		"-c:a", "aac",
@@ -219,7 +219,7 @@ func ffmpegCombine(cp string) error {
 		"-pix_fmt", "yuv420p",
 		"-bufsize", "20000k",
 		"-maxrate", "3000k",
-		"output.mkv",
+		"output.mp4",
 	}
 	cmd := exec.CommandContext(ctx, "ffmpeg", args...)
 	var sbuf strings.Builder
