@@ -70,7 +70,7 @@ func main() {
 	}
 	log.Infow("動画の切り出しに成功")
 
-	cp, err := createConcatFile(base, ml)
+	cp, err := createConcatFile(tmp, ml)
 	if err != nil {
 		log.Warnw("concatファイルの生成に失敗", "error", err)
 		os.Exit(1)
@@ -133,11 +133,15 @@ func splitMovies(base, tmp string, mm map[string]Movie) ([]string, error) {
 		vid := file[0:i]
 		if m, ok := mm[vid]; ok {
 			mp := filepath.Join(tmp, m.vid+"_movie-splitcat.mp4")
-			err := m.ffmpegSplit(p, mp)
-			if err != nil {
-				return nil, errors.Wrap(err, "動画の切り出しに失敗")
+			if isExist(mp) == false {
+				err := m.ffmpegSplit(p, mp)
+				if err != nil {
+					return nil, errors.Wrap(err, "動画の切り出しに失敗")
+				}
+				log.Infow("動画の切り出しに成功", "vid", m.vid, "src", p, "dst", mp)
+			} else {
+				log.Infow("動画は切り出し済み", "vid", m.vid, "src", p, "dst", mp)
 			}
-			log.Infow("動画の切り出しに成功", "vid", m.vid, "src", p, "dst", mp)
 			ml = append(ml, mp)
 		}
 	}
@@ -220,4 +224,9 @@ func ffmpegCombine(cp string) error {
 		return errors.Wrap(err, sbuf.String())
 	}
 	return nil
+}
+
+func isExist(filename string) bool {
+	_, err := os.Stat(filename)
+	return err == nil
 }
