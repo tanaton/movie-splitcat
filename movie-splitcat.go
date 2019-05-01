@@ -210,7 +210,7 @@ func ffmpegCombine(cp string) error {
 		"-threads", "0",
 		"-c:v", "libx264",
 		"-preset", "slow",
-		"-crf", "18",
+		"-crf", "24",
 		"-vf", "scale=1280:-1",
 		"-c:a", "aac",
 		"-b:a", "192k",
