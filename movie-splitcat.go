@@ -19,7 +19,7 @@ import (
 const (
 	SPLIT_FILE              = "split.txt"
 	HTTP_TIMEOUT            = time.Second * 30
-	COMMAND_TIMEOUT         = time.Minute * 30
+	COMMAND_TIMEOUT         = time.Hour * 30
 	DOWNLOAD_PARALLEL       = 2
 	CHUNK_DOWNLOAD_PARALLEL = 8
 )
