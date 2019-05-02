@@ -219,7 +219,7 @@ func ffmpegCombine(cp string) error {
 		"-deinterlace",
 		"-pix_fmt", "yuv420p",
 		"-bufsize", "20000k",
-		"-maxrate", "2000k",
+		"-maxrate", "5000k",
 		"output.mkv",
 	}
 	cmd := exec.CommandContext(ctx, "ffmpeg", args...)
